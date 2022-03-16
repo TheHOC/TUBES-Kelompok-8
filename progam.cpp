@@ -3,20 +3,34 @@
 #include <stdio.h>
 #include <cmath>
 #include <time.h>
+#include <string>
 
 
 // INISIALISASI
-const int mapSize[2] = {10, 10};
+
+
+class Layout {
+    public:
+        int size[2] = {10, 10};
+        char matrix[10][10];
+        Layout () {
+            srand(time(NULL));
+        }
+        
+};
+Layout map;
 
 class Robot {
     public:
         int health = 300;
         int damage = 10;
-        int pos[2] = {0, 0};
+        int pos[2] = {1, 1};
         void giliran() {                        // perintah buat player untuk ambil giliran (belum selesai)
 
         }
 };
+
+Robot player;
 
 class Bunshin {                                 // buat summon bunshin
     public: 
@@ -24,134 +38,80 @@ class Bunshin {                                 // buat summon bunshin
         int damage;
         int pos[2];
         int range = 2;
-        void attack(Robot player) {             // perintah buat bunshin untuk attack player
+        void attack() {             // perintah buat bunshin untuk attack player
             if (sqrt(pow(player.pos[0] - pos[0], 2) + pow(player.pos[1] - pos[1], 2)) < range) {
                 player.health = player.health - damage;
             }
         }
-        void gerak(Robot player) {              // perintah buat bunshin bergerak (belum selesai)
-            int arah = rand() % 4;
-            if (arah) {
-
-            }
-            
+        void gerak() {              // perintah buat bunshin bergerak (belum selesai)
+            int arah = rand() % 5;
+            if ((arah == 0) && ((pos[0] - 1 != player.pos[0]) || (pos[1] != player.pos[1])) && (pos[0] != 1)) {
+                pos[0] = pos[0] - 1;
+            } else if ((arah == 1) && ((pos[0] + 1 != player.pos[0]) || (pos[1] != player.pos[1])) && (pos[0] != 8)) {
+                pos[0] = pos[0] + 1;
+            } else if ((arah == 2) && ((pos[1] - 1 != player.pos[1]) || (pos[0] != player.pos[0])) && (pos[1] != 1)) {
+                pos[1] = pos[1] - 1;
+            } else if ((arah == 3) && ((pos[1] + 1 != player.pos[1]) || (pos[0] != player.pos[0])) && (pos[0] != 8)) {
+                pos[1] = pos[1] + 1;
+            } else if (arah == 4) {} else {
+                gerak();
+            };
         }
-        void giliran(Robot player) {            // perintah buat bunshin untuk ambil giliran (belum selesai)
-            if (rand() % 1 == 1) {
-                attack(player);
+        void giliran() {            // perintah buat bunshin untuk ambil giliran (belum selesai)
+            if ((rand() % 1 == 1) && (health > 0)) {
+                attack();
             } else {
-
+                gerak();
             }
         }
         Bunshin() {
+            srand(time(NULL));
             health = rand() % 20 + 21;
             damage = rand() % 5 + 1;
-            pos[0] = rand() % mapSize[0];
-            pos[1] = rand() % mapSize[1];
+            pos[0] = rand() % (map.size[0] - 2) + 1;
+            pos[1] = rand() % (map.size[1] - 2) + 1;
 
         }
 };
 
-void newBunshin() {
-    
-    
-}
+Bunshin bunshins[15];                         // bunshin diinisialisasiin di sini
 
-void inti() {                       // inisialisasi (belum selesai)
-    Bunshin bunshinsArr[0];
-    char **map = new char*[mapSize[1]];
-    for (int i = 0; i < mapSize[1]; ++i) {
-        map[i] = new char[mapSize[0]];
-    }
+void inti(Layout map) {                       // inisialisasi (belum selesai)
     int bunshins = 0;
-    Robot player;
+    player;
     while (player.health > 0) {
         player.giliran();
     }
 }
 
-int main() {                        // kode diluar main() belum digabung
-    int matrix[10][10];                                             
-    int i,j,koor_x,koor_y, lower, upper,x,y;                                                                                                                                    
-    for (i=0;i<10;i++) {                                                                             
-        for (j=0;j<10;j++) {                                                                           
-        matrix[i][j]=0;             /* Membuat matriks 10x10 ( yang beroperasi hanya 8x8 ) karena dikurangi oleh tembok */                                                    
+void initMap() {
+    for (int i = 0; i < map.size[1]; i++) {                                                                             
+        for(int j = 0; j < map.size[0]; j++) {        
+            map.matrix[i][j] = ' ';                                                  
+            map.matrix[i][9] = '#';
+            map.matrix[9][j] = '#';
+            map.matrix[0][j] = '#';             /* Membuat matrix tembok dengan kode # pada peta */
+            map.matrix[i][0] = '#';                                                                 
         }                                                                           
-    }   
-    for (i=0;i<10;i++) {                                                                             
-        for(j=0;j<10;j++) {                                                                           
-        matrix[i][9]=2;
-        matrix[9][j]=2;
-        matrix[0][j]=2;             /* Membuat matrix tembok dengan kode 2 pada peta */
-        matrix[j][0]=2;                                                                 
-        }                                                                           
-    }                                                                          
-    printf("\nMatrix : \n"); 
-
-    matrix[1][8]=1;                 /* Meletakan posisi robot awal (0,0) */
-  
-    for(i=9;i>-1;i=i-1) {                                                                             
-        for(j=9;j>-1;j=j-1) {                                                                           
-            if (matrix[i][j]==1) {       /* Program pembaca koordinat robot  */
-                koor_x=9-j-1 ;
-                koor_y=i-1;             /* Melakukan transformasi agar ke titik cartesius  */
-            }                                        
-        }                                                                                                                                          
-    }       
-    printf("koordinat-x: %d\n", koor_x);
-    printf("koordinat-y: %d\n", koor_y);                    
-
-
-    srand(time(0));    
-    lower = 0;
-    upper = 7;
-    x = (rand() % (upper - lower + 1)) + lower;       /* Menginisiasikan bunshin mecha kurama */
-    y = (rand() % (upper - lower + 1)) + lower;                       
-    printf("koordinat x mecha :%d\n", x);
-    printf("koordinat y mecha :%d\n", y);
-    if (x==0) {
-        if (y==0) {
-            y = (rand() % (upper - lower + 1)) + lower;
-            printf("koordinat x mecha :%d ", x);
-            printf("koordinat y mecha %d\n", y);
-        } 
     }
-    
-    matrix[y+1][8-x]=3;
-    
-    for(i=9;i>-1;i=i-1) {                                                                             
-        for(j=9;j>-1;j=j-1) {                                                                           
-          printf("%d\t", matrix[i][j]);                                    
-        }                                                                           
-        printf("\n");                                   /* Membuat peta */                            
-    } 
-    
-    int inputUser, check;
-    printf("Type 0 for attack or 1 to move: ");
-    scanf("%d", &inputUser);
-    if(inputUser == 0) {
-        printf("Making desicion to attack"); 
+}
+
+void blit(Bunshin mecha[]) {
+    initMap();
+    map.matrix[player.pos[0]][player.pos[1]] = '@';
+    for (int i = 0; i < sizeof(mecha); i++) {
+        map.matrix[mecha[i].pos[0]][mecha[i].pos[1]] = '*';
     }
-    else if (inputUser ==1) {
-        printf("Making desicion to move");
-    } else {
-        check = 0;
-        while (check == 0) {
-            printf("Wrong input please try again");
-            printf("Type 0 for attack or 1 to move: ");
-            scanf("%d", &inputUser);
-            if (inputUser == 0 ) {
-            check = 1;
-            printf("Making desicion to attack"); 
-            }
-            else if (inputUser == 1) {
-                check = 1;
-                printf("Making desicion to move");
-            } else {
-                check = 0;
-            }     
+    for (int i = sizeof(map.matrix)/sizeof(map.matrix[0]) - 1; i >= 0; i--) {
+        for (int j = 0; j < sizeof(map.matrix[i])/sizeof(map.matrix[0][0]); j++) {
+            std::cout << map.matrix[i][j] << "  ";
         }
+        std::cout << '\n';
     }
+}
+
+int main() {                       // kode diluar main() belum digabung                                       
+    blit(bunshins);
     return 0;
 };
 
