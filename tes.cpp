@@ -103,6 +103,22 @@ void finalPosition(string move)
 }
  
 
+void attack(int player_x, int player_y, int bunshin_x, int bunshin_y) {
+  printf("Making desicion to attack");
+
+  float xdistance, ydistance, distance;
+
+  xdistance = bunshin_x - player_x;
+  ydistance = bunshin_y - player_y;
+
+  distance = sqrt(xdistance * xdistance + ydistance * ydistance);
+
+  int range = 5; // inisiasi range, belum ada data awal
+
+  if (distance > range) {
+    cout << "The target is out of range!" << endl;
+  }
+}
 
 int main()
 {
@@ -177,7 +193,7 @@ int main()
   scanf("%d", &inputUser);
   if(inputUser == 0)
   {
-    printf("Making desicion to attack");
+    attack(koor_x, koor_y, x, y);
   }
   else if (inputUser ==1)
   {
@@ -199,7 +215,7 @@ int main()
       if (inputUser == 0 )
       {
         check = 1;
-        printf("Making desicion to attack"); 
+        attack(koor_x, koor_y, x, y);
       }
       else if (inputUser == 1)
       {
