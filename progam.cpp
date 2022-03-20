@@ -12,20 +12,22 @@
 class Layout;
 class Robot;
 class Bunshin;
+
 int score;
 bool game;
 
-void sleep(long seconds) {
+void sleep(long seconds) {                                                      // utk ngepause setiap ada beberapa command
     std::this_thread::sleep_for(std::chrono::milliseconds(seconds*1000));
 }
 
 const int numberOfBunshins = 9;
-float distance(float x0, float y0, float x1, float y1) {
+
+float distance(float x0, float y0, float x1, float y1) {            // fungsi mengukur jarak
     float range = sqrt(pow(y1 - y0, 2) + pow(x1 - x0, 2));
     return range;
 }
 
-class Layout {
+class Layout {                          // untuk amp
     public:
         int size[2] = {15, 15};
         char matrix[15][15];
@@ -37,7 +39,7 @@ class Layout {
 Layout map;
 
 
-class Robot {
+class Robot {                       // untuk robot yang dipakai pemain
     public:
         float health = 300;
         float damage = 10;
@@ -57,11 +59,14 @@ class Bunshin {                                 // buat summon bunshin
         int appearIn;
         bool inMap = false;
         bool alive = false;
-        bool stuck(Layout map) {
-                return ((map.matrix[pos[0]+1][pos[1]] != ' ') && (map.matrix[pos[0]-1][pos[1]] != ' ') && (map.matrix[pos[0]][pos[1]+1] != ' ') && (map.matrix[pos[0]][pos[1]-1] != ' '));
+
+        bool stuck(Layout map) {                            // boolean yang menandakan ketidakbisa gerakan player setelah mengambil turn, bisa karena bunshin maupun tembok (#)
+            return ((map.matrix[pos[0]+1][pos[1]] != ' ') && (map.matrix[pos[0]-1][pos[1]] != ' ') && (map.matrix[pos[0]][pos[1]+1] != ' ') && (map.matrix[pos[0]][pos[1]-1] != ' '));
         }
+
         void move(Layout *map, int index = 0) {              // perintah buat bunshin bergerak (belum selesai)
             int dice = (rand() + index) % 5;
+
             if ((dice == 0) && (map->matrix[pos[0] - 1][pos[1]] == ' ') && (pos[0] != 1)) {
                 pos[0] -= 1;
                 map->matrix[pos[0] - 1][pos[1]] = '*';
@@ -83,7 +88,8 @@ class Bunshin {                                 // buat summon bunshin
                 map->matrix[pos[1]][pos[1]] = ' ';
             } else if (dice == 4) {};
         }
-        void deploy(Layout *map) {
+
+        void deploy(Layout *map) {                      // untuk memunculkan bunshin di map
             health = rand() % 20 + 21;
             damage = rand() % 5 + 1;
             pos[0] = rand() % (map->size[0] - 2) + 1;
@@ -97,10 +103,11 @@ class Bunshin {                                 // buat summon bunshin
             // std::cout << "deployed " << pos[0] << pos[1] << std::endl;
             alive = true;
         }
-        void death(Layout *map) {
+
+        void death(Layout *map) {                       // dijalankan ketika suatu bunshin mati
             alive = false;
             map->matrix[pos[1]][pos[0]] = ' ';
-            appearIn = rand() % 2 + 8;
+            appearIn = rand() % 2 + 8;                  // bunshin lain akan muncul setelah beberapa giliran
             sleep(0.5);
         }
 };
@@ -113,19 +120,21 @@ void initMap() {
             map.matrix[j][i] = ' ';                                                      
             map.matrix[j][map.size[0] - 1] = '#';
             map.matrix[map.size[1] - 1][i] = '#';
-            map.matrix[0][i] = '#';             /* Membuat matrix tembok dengan kode # pada peta */
+            map.matrix[0][i] = '#';                             /* Membuat matrix tembok dengan kode # pada peta */
             map.matrix[j][0] = '#';                                                                 
         }                                                                           
     }
-    map.matrix[player.pos[1]][player.pos[0]] = 'o';
+
+    map.matrix[player.pos[1]][player.pos[0]] = 'o';             // posisi player ditandai dengan 'o'
     for (int i = 0; i < numberOfBunshins; i++) {
         if (bunshinList[i].alive) {
-            map.matrix[bunshinList[i].pos[1]][bunshinList[i].pos[0]] = '*';
+            map.matrix[bunshinList[i].pos[1]][bunshinList[i].pos[0]] = '*';         // posisi bunshin ditandai dengan '*'
         }
     }
+
 }
 
-void blit() {
+void blit() {                                                                       // untuk update map                                        
     initMap();
     for (int i = sizeof(map.matrix)/sizeof(map.matrix[0]) - 1; i >= 0; i--) {
         for (int j = 0; j < sizeof(map.matrix[i])/sizeof(map.matrix[0][0]); j++) {
@@ -135,7 +144,7 @@ void blit() {
     }
 }
 
-void botAttack(Bunshin *bot, Robot *player) {
+void botAttack(Bunshin *bot, Robot *player) {                                                   // output setelah bunshin menyerang
     if (distance(player->pos[0], player->pos[1], bot->pos[0], bot->pos[1]) < bot->range) {
         player->health = player->health - bot->damage;
         if (player->health <= 0) {
@@ -292,7 +301,7 @@ void playerTurn(Bunshin (&bot)[numberOfBunshins], Robot *player, Layout *map) { 
     }
 }
 
-void initGame() {
+void initGame() {                       // saat memulai game
     score = 0;
     initMap();
     map.matrix[player.pos[1]][player.pos[0]] = 'o';
@@ -303,7 +312,7 @@ void initGame() {
     blit();
 }
 
-void mainLoop() {
+void mainLoop() {                                       // untuk pengulangan giliran.
     playerTurn(bunshinList, &player, &map);
     for (int i = 0; i < numberOfBunshins; i++) {
         srand(time(NULL));
