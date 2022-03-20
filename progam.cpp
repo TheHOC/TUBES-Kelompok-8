@@ -27,8 +27,8 @@ float distance(float x0, float y0, float x1, float y1) {
 
 class Layout {
     public:
-        int size[2] = {15, 15};
-        char matrix[15][15];
+        int size[2] = {8, 8};
+        char matrix[8][8];
         Layout () {
             srand(time(NULL));
         }
@@ -39,10 +39,10 @@ Layout map;
 
 class Robot {
     public:
-        float health = 300;
+        float health = 10;
         float damage = 10;
         float range = 4;
-        int pos[2] = {2, 1};
+        int pos[2] = {1, 1};
         bool alive = true;
 };
 
@@ -52,7 +52,7 @@ class Bunshin {                                 // buat summon bunshin
     public: 
         float health;
         float damage;
-        float range = 2;
+        float range = 3;
         int pos[2];
         int appearIn;
         bool inMap = false;
@@ -99,9 +99,11 @@ class Bunshin {                                 // buat summon bunshin
         }
         void death(Layout *map) {
             alive = false;
+            score += 1;
+            std::cout << "Salah satu bunshin mati!" << std::endl;
             map->matrix[pos[1]][pos[0]] = ' ';
             appearIn = rand() % 2 + 8;
-            sleep(0.5);
+            sleep(1.5);
         }
 };
 
@@ -136,9 +138,15 @@ void blit() {
 }
 
 void botAttack(Bunshin *bot, Robot *player) {
-    if (distance(player->pos[0], player->pos[1], bot->pos[0], bot->pos[1]) < bot->range) {
+    if (distance(player->pos[0], player->pos[1], bot->pos[0], bot->pos[1]) < bot->range && (player->alive == true)) {
         player->health = player->health - bot->damage;
+        std::cout << "Kamu terkena serangan! (-" << bot->damage << " health)" << std::endl;
+        sleep(1.5);
+        std::cout << "lewat sini!1" << std::endl;
         if (player->health <= 0) {
+            player->alive = false;
+            std::cout << "Kamu telah mati!" << std::endl;
+            sleep(3);
             game = false;
         }
     }
@@ -153,9 +161,11 @@ void botTurn(Bunshin *bot, Robot *player, Layout *map, int index = 0) {         
         }
     } else if ((9 <= dice <= 10) && (distance(bot->pos[0], bot->pos[1], player->pos[0], player->pos[1]) < bot->range)) {
         botAttack(bot, player);
+        std::cout << "lewat sini!2" << std::endl;
     } else if (4 <= dice <= 8) {
         if (distance(bot->pos[0], bot->pos[1], player->pos[0], player->pos[1]) < bot->range) {
             botAttack(bot, player);
+            std::cout << "lewat sini!3" << std::endl;
         } else {
             bot->move(map, index);
         }
@@ -166,9 +176,10 @@ void botTurn(Bunshin *bot, Robot *player, Layout *map, int index = 0) {         
 
 void playerTurn(Bunshin (&bot)[numberOfBunshins], Robot *player, Layout *map) {                        // perintah buat player untuk ambil giliran (belum selesai)
     char act;
-    std::cout   << "Apa yang mau kamu lakukan?" << std::endl
+    std::cout   << "Health: " << player->health << std::endl
+                << "Apa yang mau kamu lakukan?" << std::endl
                 << "1. Serang sekitar (" << player->damage << " damage, " << player->range << " range)" << std::endl
-                << "2. Serang musuh terdekat (" << player->damage/5 << " damage)" << std::endl
+                << "2. Serang musuh terdekat (" << player->damage/10 << " damage)" << std::endl
                 << "3. Bergerak" << std::endl
                 << "0. Keluar program"
                 << "\n>> ";
@@ -212,10 +223,10 @@ void playerTurn(Bunshin (&bot)[numberOfBunshins], Robot *player, Layout *map) { 
         }
         if (hitNum > 0) {
             std::cout << hitNum << " bunshin kena seranganmu." << std::endl;
-            sleep(2);
+            sleep(1.5);
         } else {
             std::cout << "Tidak ada bunshin yang kena seranganmu!" << std::endl;
-            sleep(2);
+            sleep(1.5);
         }
     } else if (act == '2') {
         float botMinRange = 0;
@@ -229,16 +240,16 @@ void playerTurn(Bunshin (&bot)[numberOfBunshins], Robot *player, Layout *map) { 
             }
         }
         if (botMinRange != 0) {
-            closest->health -= player->damage/5;
+            closest->health -= player->damage/10;
             if (closest->health <= 0) {
                 closest->death(map);
                 map->matrix[closest->pos[1]][closest->pos[0]] = ' ';
             }
             std::cout << "Seranganmu kena salah satu bunshin!" << std::endl;
-            sleep(2);
+            sleep(1.5);
         } else {
             std::cout << "Peluru seranganmu nyasar!" << std::endl;
-            sleep(2);
+            sleep(1.5);
         }
     } else if (act == '3') {
         char moves[4] = {'w', 'a', 's', 'd'};
@@ -258,7 +269,12 @@ void playerTurn(Bunshin (&bot)[numberOfBunshins], Robot *player, Layout *map) { 
             std::cout   << ")" << std::endl
                         << ">> ";
             std::cin    >> choice;
-            while ()
+            while (!(avMo[0] && (choice == 'w' || choice == 'W')) && !(avMo[1] && (choice == 'a' || choice == 'A')) && !(avMo[2] && (choice == 's' || choice == 'S')) && !(avMo[3] && (choice == 'd' || choice == 'D'))) {
+                std::cout << "Masukan salah!" << std::endl;
+                sleep(1);
+                std::cout   << ">> ";
+                std::cin    >> choice;
+            }
             if (avMo[0] && (choice == 'w' || choice == 'W')) {
                 map->matrix[player->pos[0]][player->pos[1]] = ' ';
                 player->pos[1] += 1;
@@ -271,20 +287,15 @@ void playerTurn(Bunshin (&bot)[numberOfBunshins], Robot *player, Layout *map) { 
                 map->matrix[player->pos[0]][player->pos[1]] = ' ';
                 player->pos[1] -= 1;
                 map->matrix[player->pos[0]][player->pos[1]-1] = 'o';
-            } else if (avMo[2] && (choice == 'd' || choice == 'D')) {
+            } else if (avMo[3] && (choice == 'd' || choice == 'D')) {
                 map->matrix[player->pos[0]][player->pos[1]] = ' ';
                 player->pos[0] += 1;
                 map->matrix[player->pos[0]+1][player->pos[1]] = 'o';
-            } else {
-                std::cout << "Masukan salah!" << std::endl;
-                sleep(1);
-                
-                
-            }  
+            }     
         } else {
             system("cls");
             std::cout << "Kamu tidak bisa bergerak." << std::endl;
-            sleep(2);
+            sleep(1.5);
             system("cls");
             blit();
             playerTurn(bot, player, map);
@@ -299,6 +310,7 @@ void initGame() {
     for (int i = 0; i < numberOfBunshins; i++) {
         bunshinList[i].appearIn = i * 3 + 1;
         botTurn(&bunshinList[i], &player, &map, i);
+        std::cout << "lewat sini!4" << std::endl;
     }
     blit();
 }
@@ -308,6 +320,7 @@ void mainLoop() {
     for (int i = 0; i < numberOfBunshins; i++) {
         srand(time(NULL));
         botTurn(&bunshinList[i], &player, &map, i);
+        std::cout << "lewat sini!5" << std::endl;
         // std::cout << bunshinList[i].appearIn << " | " << bunshinList[i].pos[0] << " | " << bunshinList[i].pos[1] << " | " << bunshinList[i].health << std::endl;
     }
     system("cls");
@@ -323,7 +336,8 @@ int main() {                       // kode diluar main() belum digabung
     system("cls");
     blit();
     std::cout   << "\nGAME BERAKHIR"
-                << "\nskor : " << score;
+                << "\nskor : " << score << std::endl;
+    system("Pause");
     return 0;
 };
 
