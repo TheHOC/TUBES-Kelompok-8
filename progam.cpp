@@ -109,15 +109,10 @@ class Bunshin {                                 // buat summon bunshin
             score += 1;
             std::cout << "Salah satu bunshin mati!" << std::endl;
             map->matrix[pos[1]][pos[0]] = ' ';
-<<<<<<< HEAD
-            appearIn = rand() % 2 + 8;
-            sleep(1.5);
-=======
+
             appearIn = rand() % 2 + 8;                  // bunshin lain akan muncul setelah beberapa giliran
-            sleep(0.5);
->>>>>>> 0dd984d (Menambahkan komentar untuk keterangan beberapa fungsi)
-        }
-};
+            sleep(1.5);
+}};
 
 Bunshin bunshinList[numberOfBunshins];                         // bunshin diinisialisasiin di sini
 
@@ -151,13 +146,8 @@ void blit() {                                                                   
     }
 }
 
-<<<<<<< HEAD
-void botAttack(Bunshin *bot, Robot *player) {
-    if (distance(player->pos[0], player->pos[1], bot->pos[0], bot->pos[1]) < bot->range && (player->alive == true)) {
-=======
 void botAttack(Bunshin *bot, Robot *player) {                                                   // output setelah bunshin menyerang
-    if (distance(player->pos[0], player->pos[1], bot->pos[0], bot->pos[1]) < bot->range) {
->>>>>>> 0dd984d (Menambahkan komentar untuk keterangan beberapa fungsi)
+    if (distance(player->pos[0], player->pos[1], bot->pos[0], bot->pos[1]) < bot->range && (player->alive == true)) {
         player->health = player->health - bot->damage;
         std::cout << "Kamu terkena serangan! (-" << bot->damage << " health)" << std::endl;
         sleep(1.5);
