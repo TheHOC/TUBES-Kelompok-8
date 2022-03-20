@@ -29,8 +29,8 @@ float distance(float x0, float y0, float x1, float y1) {            // fungsi me
 
 class Layout {                          // untuk amp
     public:
-        int size[2] = {8, 8};
-        char matrix[8][8];
+        int size[2] = {10, 10};
+        char matrix[10][10];
         Layout () {
             srand(time(NULL));
         }
@@ -41,7 +41,7 @@ Layout map;
 
 class Robot {                       // untuk robot yang dipakai pemain
     public:
-        float health = 10;
+        float health = 30;
         float damage = 10;
         float range = 4;
         int pos[2] = {1, 1};
@@ -94,7 +94,7 @@ class Bunshin {                                 // buat summon bunshin
             damage = rand() % 5 + 1;
             pos[0] = rand() % (map->size[0] - 2) + 1;
             pos[1] = rand() % (map->size[1] - 2) + 1;
-            while ((map->matrix[pos[1]][pos[0]] != ' ') || distance(pos[0], pos[1], player.pos[0], player.pos[1]) < 5) {
+            while ((map->matrix[pos[1]][pos[0]] != ' ') || distance(pos[0], pos[1], player.pos[0], player.pos[1]) < 3) {
                 // std::cout << map->matrix[pos[1]][pos[0]] << (map->matrix[pos[1]][pos[0]] == ' ') << std::endl;
                 pos[0] = rand() % (map->size[0] - 2) + 1;
                 pos[1] = rand() % (map->size[1] - 2) + 1;
@@ -151,7 +151,6 @@ void botAttack(Bunshin *bot, Robot *player) {                                   
         player->health = player->health - bot->damage;
         std::cout << "Kamu terkena serangan! (-" << bot->damage << " health)" << std::endl;
         sleep(1.5);
-        std::cout << "lewat sini!1" << std::endl;
         if (player->health <= 0) {
             player->alive = false;
             std::cout << "Kamu telah mati!" << std::endl;
@@ -163,6 +162,7 @@ void botAttack(Bunshin *bot, Robot *player) {                                   
 
 void botTurn(Bunshin *bot, Robot *player, Layout *map, int index = 0) {            // perintah buat bunshin untuk ambil giliran (belum selesai)
     int dice = (rand() % 10) + 1;
+    std::cout << index << " " << bot->alive << " " << bot->appearIn << std::endl;
     if (bot->appearIn > 0) {
         bot->appearIn--;
         if (bot->appearIn <= 0) {
@@ -170,11 +170,9 @@ void botTurn(Bunshin *bot, Robot *player, Layout *map, int index = 0) {         
         }
     } else if ((9 <= dice <= 10) && (distance(bot->pos[0], bot->pos[1], player->pos[0], player->pos[1]) < bot->range)) {
         botAttack(bot, player);
-        std::cout << "lewat sini!2" << std::endl;
     } else if (4 <= dice <= 8) {
         if (distance(bot->pos[0], bot->pos[1], player->pos[0], player->pos[1]) < bot->range) {
             botAttack(bot, player);
-            std::cout << "lewat sini!3" << std::endl;
         } else {
             bot->move(map, index);
         }
@@ -319,7 +317,6 @@ void initGame() {                       // saat memulai game
     for (int i = 0; i < numberOfBunshins; i++) {
         bunshinList[i].appearIn = i * 3 + 1;
         botTurn(&bunshinList[i], &player, &map, i);
-        std::cout << "lewat sini!4" << std::endl;
     }
     blit();
 }
@@ -327,9 +324,7 @@ void initGame() {                       // saat memulai game
 void mainLoop() {                                       // untuk pengulangan giliran.
     playerTurn(bunshinList, &player, &map);
     for (int i = 0; i < numberOfBunshins; i++) {
-        srand(time(NULL));
         botTurn(&bunshinList[i], &player, &map, i);
-        std::cout << "lewat sini!5" << std::endl;
         // std::cout << bunshinList[i].appearIn << " | " << bunshinList[i].pos[0] << " | " << bunshinList[i].pos[1] << " | " << bunshinList[i].health << std::endl;
     }
     system("cls");
